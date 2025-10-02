@@ -5,6 +5,7 @@ import {
   addServer,
   addOrUpdateServer,
   removeServer,
+  copyServer,
   notifyToolChanged,
   syncToolEmbedding,
   toggleServerStatus,
@@ -292,6 +293,49 @@ export const updateServer = async (req: Request, res: Response): Promise<void> =
       });
     }
   } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
+export const copyServerEndpoint = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name } = req.params;
+    const { newName } = req.body;
+
+    if (!name) {
+      res.status(400).json({
+        success: false,
+        message: 'Source server name is required',
+      });
+      return;
+    }
+
+    if (!newName) {
+      res.status(400).json({
+        success: false,
+        message: 'New server name is required',
+      });
+      return;
+    }
+
+    const result = await copyServer(name, newName);
+    if (result.success) {
+      notifyToolChanged();
+      res.json({
+        success: true,
+        message: result.message || 'Server copied successfully',
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message || 'Failed to copy server',
+      });
+    }
+  } catch (error) {
+    console.error('Error copying server:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

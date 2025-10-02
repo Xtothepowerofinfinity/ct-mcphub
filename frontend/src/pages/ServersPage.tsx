@@ -38,6 +38,31 @@ const ServersPage: React.FC = () => {
     triggerRefresh();
   };
 
+  const handleCopyServer = async (serverName: string) => {
+    const newName = prompt(t('server.copyPrompt'), `${serverName}-copy`);
+    if (!newName) return;
+
+    try {
+      const response = await fetch(`/api/servers/${serverName}/copy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newName }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        triggerRefresh();
+      } else {
+        setError(result.message || t('server.copyFailed'));
+      }
+    } catch (err) {
+      setError(t('server.copyFailed'));
+      console.error('Error copying server:', err);
+    }
+  };
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
@@ -140,6 +165,7 @@ const ServersPage: React.FC = () => {
               server={server}
               onRemove={handleServerRemove}
               onEdit={handleEditClick}
+              onCopy={handleCopyServer}
               onToggle={handleServerToggle}
               onRefresh={triggerRefresh}
             />

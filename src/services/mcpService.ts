@@ -345,15 +345,9 @@ export const initializeClientsFromSettings = async (
 
   // Get startup delay from environment variable (default: 1000ms = 1 second)
   const SERVER_STARTUP_DELAY = parseInt(process.env.MCP_SERVER_STARTUP_DELAY || '1000', 10);
-  let serverIndex = 0;
+  let newServerCount = 0;
 
   for (const conf of allServers) {
-    // Add delay between servers to prevent I/O overload (skip for first server)
-    if (serverIndex > 0) {
-      console.log(`Waiting ${SERVER_STARTUP_DELAY / 1000}s before starting next server...`);
-      await new Promise(resolve => setTimeout(resolve, SERVER_STARTUP_DELAY));
-    }
-    serverIndex++;
     const { name } = conf;
     // Skip disabled servers
     if (conf.enabled === false) {
@@ -383,6 +377,13 @@ export const initializeClientsFromSettings = async (
       console.log(`Server '${name}' is already connected.`);
       continue;
     }
+
+    // Add delay only before actual new server initialization (skip for first new server)
+    if (newServerCount > 0) {
+      console.log(`Waiting ${SERVER_STARTUP_DELAY / 1000}s before starting next server...`);
+      await new Promise(resolve => setTimeout(resolve, SERVER_STARTUP_DELAY));
+    }
+    newServerCount++;
 
     let transport;
     let openApiClient;
@@ -680,6 +681,32 @@ export const removeServer = async (
 
   serverInfos = serverInfos.filter((serverInfo) => serverInfo.name !== name);
   return { success: true, message: 'Server removed successfully' };
+};
+
+// Copy existing server with new name
+export const copyServer = async (
+  sourceName: string,
+  newName: string,
+): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const sourceServer = await serverDao.findById(sourceName);
+    if (!sourceServer) {
+      return { success: false, message: `Source server '${sourceName}' not found` };
+    }
+
+    const exists = await serverDao.exists(newName);
+    if (exists) {
+      return { success: false, message: `Server name '${newName}' already exists` };
+    }
+
+    const { name, ...config } = sourceServer;
+    await serverDao.create({ name: newName, ...config });
+
+    return { success: true, message: 'Server copied successfully' };
+  } catch (error) {
+    console.error('Error copying server:', error);
+    return { success: false, message: `Failed to copy server: ${error}` };
+  }
 };
 
 // Add or update server (supports overriding existing servers for DXT)

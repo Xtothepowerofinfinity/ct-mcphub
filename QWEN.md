@@ -78,6 +78,8 @@ backend-specialist.md       debian-sysadmin-xinfty.md  project-manager.md       
 change-reviewer.md          frontend-react-expert.md   runtime-debugger.md             user-story-executor.md
 
 
+- Die Umsetzung von Arbeitspaketen ist atomar zu delegieren, mit spezifischer Anweisung, was zu erreichen ist.
+- Bei jeglicher Abweichung - bspw. erkannte Mehrarbeit, auftretende Probleme, zusätzliche Umsetzungsschritte - ist das Arbeitspaket zur Klärung an den Delegierenden zurpckzugeben.
 - Jede Tätigkeit durchläuft folgenden Prozess, wobei der Project Manager Einstuegspunkt und SPOC ist:  
 
 1. **PLANUNG** Team mode: PLAN ==> AENDERUNGEN AM CODE ODER SYSTEM SIND STRENGSTENS VERBOTEN!

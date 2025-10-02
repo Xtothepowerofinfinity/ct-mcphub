@@ -12,11 +12,12 @@ interface ServerCardProps {
   server: Server
   onRemove: (serverName: string) => void
   onEdit: (server: Server) => void
+  onCopy: (serverName: string) => void
   onToggle?: (server: Server, enabled: boolean) => Promise<boolean>
   onRefresh?: () => void
 }
 
-const ServerCard = ({ server, onRemove, onEdit, onToggle, onRefresh }: ServerCardProps) => {
+const ServerCard = ({ server, onRemove, onEdit, onCopy, onToggle, onRefresh }: ServerCardProps) => {
   const { t } = useTranslation()
   const { showToast } = useToast()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -47,6 +48,11 @@ const ServerCard = ({ server, onRemove, onEdit, onToggle, onRefresh }: ServerCar
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation()
     onEdit(server)
+  }
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onCopy(server.name)
   }
 
   const handleToggle = async (e: React.MouseEvent) => {
@@ -235,6 +241,13 @@ const ServerCard = ({ server, onRemove, onEdit, onToggle, onRefresh }: ServerCar
               className="px-3 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 text-sm btn-primary"
             >
               {t('server.edit')}
+            </button>
+            <button
+              onClick={handleCopy}
+              className="px-3 py-1 bg-purple-100 text-purple-800 rounded hover:bg-purple-200 text-sm btn-primary"
+              title={t('server.copy')}
+            >
+              {t('server.copy')}
             </button>
             <div className="flex items-center">
               <button
