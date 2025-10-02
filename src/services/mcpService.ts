@@ -343,7 +343,17 @@ export const initializeClientsFromSettings = async (
   const existingServerInfos = serverInfos;
   serverInfos = [];
 
+  // Get startup delay from environment variable (default: 1000ms = 1 second)
+  const SERVER_STARTUP_DELAY = parseInt(process.env.MCP_SERVER_STARTUP_DELAY || '1000', 10);
+  let serverIndex = 0;
+
   for (const conf of allServers) {
+    // Add delay between servers to prevent I/O overload (skip for first server)
+    if (serverIndex > 0) {
+      console.log(`Waiting ${SERVER_STARTUP_DELAY / 1000}s before starting next server...`);
+      await new Promise(resolve => setTimeout(resolve, SERVER_STARTUP_DELAY));
+    }
+    serverIndex++;
     const { name } = conf;
     // Skip disabled servers
     if (conf.enabled === false) {
